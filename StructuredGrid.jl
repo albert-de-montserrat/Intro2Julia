@@ -24,15 +24,6 @@ struct LazyGrid{M, N}
     nxny::Int64
 end
 
-# struct LazyGrid{M, N, T} 
-#     c0::M # origin corner
-#     c1::M # opposite corner
-#     Δ::M # directional steps
-#     nels::N # number of elements
-#     nnods::N # number of nodes
-#     nxny::T
-# end
-
 struct Point{T}
     x::T
     y::T
@@ -60,7 +51,6 @@ function grid(c0, c1, nnods, T::Type{LinearMesh})
     )
 
 end
-
 
 function lazy_grid(c0, c1, nnods)
     nels = nnods.-1
