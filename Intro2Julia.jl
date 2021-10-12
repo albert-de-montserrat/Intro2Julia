@@ -688,16 +688,16 @@ Both Nvidia and AMD [GPUs](https://github.com/JuliaGPU) are supported by Julia. 
 """
 
 # ╔═╡ a6aed0b2-882c-44bd-96f3-aff42e0062af
-Ad, Bd, vd = CuArray(A), CuArray(B), CuArray(v);
+# Ad, Bd, vd = CuArray(A), CuArray(B), CuArray(v);
 
 # ╔═╡ 2ac430a3-8922-4be0-a8ae-a87ec3ad7ff6
-Ad*Bd
+# Ad*Bd
 
 # ╔═╡ ece321e3-c1fe-41a9-99e4-168c9420f8ce
 # map(sin, vd) # somehow this crashes in Pluto
 
 # ╔═╡ dd1cf62c-5d88-4769-af81-4d054c8a533c
-cholesky(Ad*Ad'+I)
+# cholesky(Ad*Ad'+I)
 
 # ╔═╡ 93d584fe-3c2c-4849-ac60-45888767948d
 md"""
