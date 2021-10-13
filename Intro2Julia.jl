@@ -74,6 +74,31 @@ Interaction session:
 Scripts can be run from the terminal ```julia MyScript.jl```
 """
 
+# ╔═╡ eb8c884a-5302-4b86-a5fe-312d079847d9
+md"""
+# Where to learn Julia?
+* [Documentation](https://docs.julialang.org/en/v1/)
+* [Discourse](https://discourse.julialang.org/)
+"""
+
+# ╔═╡ 67a377d3-d243-4c79-85ce-2b34648ec214
+md"""
+# Why using Julia?
+- [Fast](https://julialang.org/benchmarks/). Your kernels will have a performance comparable to C/C++/Fortran
+- Syntax (≢ code design) similar to MATLAB/Python
+- Readible code → easier to mantain and easier for others to contribute
+- Interactivity → increase in productivity
+- Many scientific packages already available
+
+## Disadvantages
+- Slow compilation time (getting better with every new release)
+
+## When to use or not Julia?
+- To produce **new** software. Julia interacts well with other languages such as C and Fortran, so there's no need to reinvent the wheel (most of the linear algebra functions fallback into BLAS and LAPACK calls)
+- To ort slow code from MATLAB/Python
+- Slow compilation time means that small scripts that you need to runs just once may run slower than in MATLAB/Python.
+"""
+
 # ╔═╡ 82147a99-f8de-497c-97f9-8e354f9155ec
 md"""
 # Packages
@@ -114,7 +139,7 @@ md"""
 
 # ╔═╡ bdfa6d39-9b42-4fda-a9c4-2314cad5a373
 md"""
-# Main annoying differences coming from MATLAB
+# Main differences with respect to MATLAB
 
 * Arrays are indixed with squared brackets ```A[i,j]```
 * In matlab ```A==B``` returns a boolean vector, Julia returns a **scalar** boolean (```true``` or ```false```). The boolean vector is obtained with ```A.==B```
@@ -325,6 +350,35 @@ Use the macro ```@inbound``` to tell the compiler not to check if the index is w
 @inbounds for i in 1:length(x) 
     sin(x[i])*exp(x[i]);
 end;
+
+
+# ╔═╡ 7065de01-e486-4679-9c4f-0efd5328eb34
+md"""
+# Variables scope
+The scope of a variable is where the variable is visible. A variable can have either a _global_ or _local_ scope. Global variables are declare by adding the prefix ```const``` 
+"""
+
+# ╔═╡ 2a3216bd-5097-4b46-a110-a13ee1250718
+const euler = 2.718281828459045235360
+
+# ╔═╡ 1b1d89b3-9b01-446d-b172-ce49a80ce929
+md"""
+Local variables are visible only within code blocks. For example if a variable is defined within a function and not returned, it does not exist outside the function:
+"""
+
+# ╔═╡ 18d3c4b7-edbf-46f0-a333-85713458fe0b
+function h1(x)
+	hola = "Hola " # does not exist outside this function
+	return string(hola, x)
+end;
+
+# ╔═╡ 120a1172-10a0-4598-a1f9-cc6dddf61cfa
+md"""
+A variable allocated inside a code block, is of global character **only within** the code blocks. Code blocks include not only functions, but also ```for``` and ```while```:
+"""
+
+# ╔═╡ dbd26f87-4a3b-4b1a-a309-0f998b2b3ec9
+# h2(rand(10))
 
 # ╔═╡ 30d283b3-c45e-47c6-bbc5-30c908df4779
 md"""
