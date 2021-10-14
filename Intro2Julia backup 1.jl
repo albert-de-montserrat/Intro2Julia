@@ -11,7 +11,7 @@ using PlutoUI
 using BenchmarkTools # add benchmarking package
 
 # ╔═╡ 333f966c-d6c6-444f-be49-5b14f94c5fcf
-using LinearAlgebra; # most of the linear algebra functions are in here
+using LinearAlgebra;
 
 # ╔═╡ 26ed158a-8546-4daa-8cfe-a6c7bfcfde57
 using StaticArrays
@@ -72,6 +72,31 @@ Interaction session:
 2. [VSCode](https://code.visualstudio.com/). Highly recommended
 
 Scripts can be run from the terminal ```julia MyScript.jl```
+"""
+
+# ╔═╡ eb8c884a-5302-4b86-a5fe-312d079847d9
+md"""
+# Where to learn Julia?
+* [Documentation](https://docs.julialang.org/en/v1/)
+* [Discourse](https://discourse.julialang.org/)
+"""
+
+# ╔═╡ 67a377d3-d243-4c79-85ce-2b34648ec214
+md"""
+# Why using Julia?
+- [Fast](https://julialang.org/benchmarks/). Your kernels will have a performance comparable to C/C++/Fortran
+- Syntax (≢ code design) similar to MATLAB/Python
+- Readible code → easier to mantain and easier for others to contribute
+- Interactivity → increase in productivity
+- Many scientific packages already available
+
+## Disadvantages
+- Slow compilation time (getting better with every new release)
+
+## When to use or not Julia?
+- To produce **new** software. Julia interacts well with other languages such as C and Fortran, so there's no need to reinvent the wheel (most of the linear algebra functions fallback into BLAS and LAPACK calls)
+- To ort slow code from MATLAB/Python
+- Slow compilation time means that small scripts that you need to runs just once may run slower than in MATLAB/Python.
 """
 
 # ╔═╡ 82147a99-f8de-497c-97f9-8e354f9155ec
@@ -236,7 +261,7 @@ We can write it almost as in MATLAB:
 """
 
 # ╔═╡ ceaa4f8c-18a9-487f-911a-da8252acc7ec
-dxdy1(x,y) = @. (y[3:end] - y[1:end-2])*0.5/(x[2]-x[1]); # one-liner function
+dxdy1(x,y) = @. (y[3:end] - y[1:end-2])*0.5/(x[2]-x[1]);
 
 # ╔═╡ bc310c73-d166-49d4-bfc8-de3d792af59f
 vx = LinRange(0, 2π, 1_000); vy = sin.(vx); # we can use Unicode symbols such as π
@@ -274,23 +299,13 @@ A*B # this calls OpenBlas for dense arrays
 A*v # this calls OpenBlas for dense arrays
 
 # ╔═╡ c52e48fa-e742-4ff4-a5ac-55b344b16375
-v ⋅ v # dot product. Alternative syntax dot(v,v)
+v ⋅ v # dot product (or dot(v,v) )
 
 # ╔═╡ 1c80661e-a9df-47aa-899f-5c7eb79a050d
 det(A)
 
-# ╔═╡ c4b5f684-6756-4efd-87a2-782483cd77e5
-md"""
-Julia can solve linear systems of equations with the operator ```\``` the same way MATLAB does. ```\``` will fallback into the appropriate method (LU, Cholesky, QR,...):
-"""
-
 # ╔═╡ d04d45e5-87b2-4f76-b0f8-d9a415608f03
 A\v # this calls LAPACK for dense arrays and SuitSparse for sparse arrays
-
-# ╔═╡ 4c4bcecd-881e-4c6d-922a-66a4e181181a
-md"""
-You could ```inv(A)*v```, but please never do ```inv(A)```, if you really need an inverse do ```A\I``` ($$AA^{-1}=I\rightarrow A^{-1}=A^{-1}I$$)
-"""
 
 # ╔═╡ 1165c3cb-c90b-4dfb-b7dc-36f3f47b7b65
 md"""
@@ -336,6 +351,34 @@ Use the macro ```@inbound``` to tell the compiler not to check if the index is w
     sin(x[i])*exp(x[i]);
 end;
 
+
+# ╔═╡ 7065de01-e486-4679-9c4f-0efd5328eb34
+md"""
+# Variables scope
+The scope of a variable is where the variable is visible. A variable can have either a _global_ or _local_ scope. Global variables are declare by adding the prefix ```const``` 
+"""
+
+# ╔═╡ 2a3216bd-5097-4b46-a110-a13ee1250718
+const euler = 2.718281828459045235360
+
+# ╔═╡ 1b1d89b3-9b01-446d-b172-ce49a80ce929
+md"""
+Local variables are visible only within code blocks. For example if a variable is defined within a function and not returned, it does not exist outside the function:
+"""
+
+# ╔═╡ 18d3c4b7-edbf-46f0-a333-85713458fe0b
+function h1(x)
+	hola = "Hola " # does not exist outside this function
+	return string(hola, x)
+end;
+
+# ╔═╡ 120a1172-10a0-4598-a1f9-cc6dddf61cfa
+md"""
+A variable allocated inside a code block, is of global character **only within** the code blocks. Code blocks include not only functions, but also ```for``` and ```while```:
+"""
+
+# ╔═╡ dbd26f87-4a3b-4b1a-a309-0f998b2b3ec9
+# h2(rand(10))
 
 # ╔═╡ 30d283b3-c45e-47c6-bbc5-30c908df4779
 md"""
@@ -734,26 +777,9 @@ md"""
     * Multiplication is faster than division
     * Powers, roots, exponentials and trigonometric functions are slow. Simplify expressions as much as possible (use symbolic calculus)
 5. Hardware optimizations. E.g.:
-    * Unlike Intel Compilers, LLVM does not automatically generate _fuse-multiply add_ (fma) instructions (fast and more accurate algorithm to do ```fma(a,b,c) = a*b+c```). For complex expressions use the ```@muladd``` [macro](https://github.com/SciML/MuladdMacro.jl). **Note**: for Intel Compiler to generate fma instructions you may want to write code in a fma-friendly way: ```a*(1/b)+c``` instead of ```a/b+c```; ```a*a+c``` instead of ```a^2+c```
-
+    * Fuse-multiply add (fma): fast algorithm to calculate ```fma(a,b,c) = a*b+c```. Supported by most of the CPUs. For complex expressions use the ```@muladd``` [macro](https://github.com/SciML/MuladdMacro.jl)
     * Vectorize loops with the macros ```@turbo``` (single-thread) ```@tturbo``` (multi-thread) from [LoopVectorization.jl](https://github.com/JuliaSIMD/LoopVectorization.jl)
 """
-
-# ╔═╡ 255e02eb-2ab7-4c22-ab16-6a262687f383
-md"""
-# Example: Circular Array
-"""
-
-# ╔═╡ 96fb50fb-9954-49a5-b512-39dc9199f7d5
-function Base.getindex(A::CircularArray, I::Int) 
-    I2 = length(A)
-    return Base.getindex(A.x,  mod(I - 1,I2) + 1)
-end
-
-# ╔═╡ 458bfaab-594f-48f8-945a-2ae675a9aebc
-# function Base.setindex!(A::CircularArray,value,I::Int) 
-#     return Base.setindex!(A.x,value,(mod.(I .- 1,I2) .+ 1))
-# end
 
 # ╔═╡ 6b08d896-cdb1-4c3a-bec8-3922eaaac279
 md"""
@@ -2141,7 +2167,7 @@ version = "0.9.1+5"
 # ╟─df216392-a6c9-4742-8d8e-f6bdcb824961
 # ╠═ca64cf39-e99d-4de7-ba96-47869a8fd32f
 # ╟─bf6fa75b-c3d2-4e59-bc27-aa8b14dfa293
-# ╟─e1c71f8d-60e6-43ae-8668-7e79905cafaf
+# ╠═e1c71f8d-60e6-43ae-8668-7e79905cafaf
 # ╠═ceaa4f8c-18a9-487f-911a-da8252acc7ec
 # ╠═bc310c73-d166-49d4-bfc8-de3d792af59f
 # ╠═2092b21e-d81b-46c8-82e3-190589ea034d
@@ -2157,9 +2183,7 @@ version = "0.9.1+5"
 # ╠═333f966c-d6c6-444f-be49-5b14f94c5fcf
 # ╠═c52e48fa-e742-4ff4-a5ac-55b344b16375
 # ╠═1c80661e-a9df-47aa-899f-5c7eb79a050d
-# ╟─c4b5f684-6756-4efd-87a2-782483cd77e5
 # ╠═d04d45e5-87b2-4f76-b0f8-d9a415608f03
-# ╟─4c4bcecd-881e-4c6d-922a-66a4e181181a
 # ╠═c935a6db-ed98-4f01-8e41-b6bd903f7a16
 # ╠═d2a9fa6c-9aa5-4818-8746-4fc4142a34ee
 # ╠═14634323-48d4-4481-ae6f-602913747220
@@ -2236,9 +2260,6 @@ version = "0.9.1+5"
 # ╠═dd1cf62c-5d88-4769-af81-4d054c8a533c
 # ╟─93d584fe-3c2c-4849-ac60-45888767948d
 # ╟─75eb6eb7-2b51-43a6-b5bb-4a7068de55b7
-# ╟─255e02eb-2ab7-4c22-ab16-6a262687f383
-# ╠═96fb50fb-9954-49a5-b512-39dc9199f7d5
-# ╠═458bfaab-594f-48f8-945a-2ae675a9aebc
 # ╟─6b08d896-cdb1-4c3a-bec8-3922eaaac279
 # ╠═ddd2a803-07fc-40cc-8db1-e9ffc5748a73
 # ╠═559e468f-1970-458b-a9f9-a7fb08291bd1
