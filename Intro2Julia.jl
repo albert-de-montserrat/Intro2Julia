@@ -16,9 +16,6 @@ using LinearAlgebra; # most of the linear algebra functions are in here
 # ╔═╡ 26ed158a-8546-4daa-8cfe-a6c7bfcfde57
 using StaticArrays
 
-# ╔═╡ f2d55b58-74a0-408c-b820-962de127c4df
-using CUDA
-
 # ╔═╡ eccf89a9-089f-44f6-9282-2a775205953e
 using StatsPlots, Statistics
 
@@ -698,6 +695,9 @@ md"""
 Both Nvidia and AMD [GPUs](https://github.com/JuliaGPU) are supported by Julia. If you have an Nvidia GPU card you can uncomment the code snippets below and add [CUDA.jl](https://github.com/JuliaGPU/CUDA.jl), otherwise the notebook might crash.
 """
 
+# ╔═╡ f2d55b58-74a0-408c-b820-962de127c4df
+# using CUDA
+
 # ╔═╡ a6aed0b2-882c-44bd-96f3-aff42e0062af
 # Ad, Bd, vd = CuArray(A), CuArray(B), CuArray(v);
 
@@ -742,18 +742,8 @@ md"""
 # ╔═╡ 255e02eb-2ab7-4c22-ab16-6a262687f383
 md"""
 # Example: Circular Array
+Check CircularArray.jl file.
 """
-
-# ╔═╡ 96fb50fb-9954-49a5-b512-39dc9199f7d5
-function Base.getindex(A::CircularArray, I::Int) 
-    I2 = length(A)
-    return Base.getindex(A.x,  mod(I - 1,I2) + 1)
-end
-
-# ╔═╡ 458bfaab-594f-48f8-945a-2ae675a9aebc
-# function Base.setindex!(A::CircularArray,value,I::Int) 
-#     return Base.setindex!(A.x,value,(mod.(I .- 1,I2) .+ 1))
-# end
 
 # ╔═╡ 6b08d896-cdb1-4c3a-bec8-3922eaaac279
 md"""
@@ -765,7 +755,6 @@ begin
 	c0 = (0f0, 0f0, 0f0) # origin corner
 	c1 = (1f0, 1f0, 1f0) # opposite corner
 	nels = (100, 100, 100) # number of elements per cartesian axis
-	# nels = (33, 80, 50) # number of elements per cartesian axis
 	nnods = nels .+ 1 # number of nodes per cartesian axis
 	gr = grid(c0, c1, nnods, LinearMesh); # generate grid
 end;
@@ -944,11 +933,16 @@ speedup_linear = speedup(time_linear);
 # ╔═╡ 88531bc9-0cd7-4bdd-a6e8-1487772eb008
 groupedbar([speedup_cartesian speedup_linear], group = gp, bar_position = :dodge, bar_width=0.7, xticks=(1:4, ticklabel), ylabel="speed up", legend=:topleft)
 
+# ╔═╡ af6568d6-c54f-408f-a286-0193c8cff998
+md"""
+# Exercise
+Create the nodal incidence graph of a $$10\times10\times10$$ grid assuming that a node is connected to every other node in a cell.
+"""
+
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
-CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
@@ -957,7 +951,6 @@ StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 
 [compat]
 BenchmarkTools = "~1.2.0"
-CUDA = "~3.5.0"
 PlutoUI = "~0.7.16"
 StaticArrays = "~1.2.13"
 StatsPlots = "~0.14.28"
@@ -1006,12 +999,6 @@ git-tree-sha1 = "66771c8d21c8ff5e3a93379480a2307ac36863f7"
 uuid = "13072b0f-2c55-5437-9ae7-d433b7a33950"
 version = "1.0.1"
 
-[[deps.BFloat16s]]
-deps = ["LinearAlgebra", "Printf", "Random", "Test"]
-git-tree-sha1 = "a598ecb0d717092b5539dbbe890c98bac842b072"
-uuid = "ab4f0b2a-ad5b-11e8-123f-65d77653426b"
-version = "0.2.0"
-
 [[deps.Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 
@@ -1026,17 +1013,6 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "19a35467a82e236ff51bc17a3a44b69ef35185a2"
 uuid = "6e34b625-4abd-537c-b88f-471c36dfa7a0"
 version = "1.0.8+0"
-
-[[deps.CEnum]]
-git-tree-sha1 = "215a9aa4a1f23fbd05b92769fdd62559488d70e9"
-uuid = "fa961155-64e5-5f13-b03f-caf6b980ea82"
-version = "0.4.1"
-
-[[deps.CUDA]]
-deps = ["AbstractFFTs", "Adapt", "BFloat16s", "CEnum", "CompilerSupportLibraries_jll", "ExprTools", "GPUArrays", "GPUCompiler", "LLVM", "LazyArtifacts", "Libdl", "LinearAlgebra", "Logging", "Printf", "Random", "Random123", "RandomNumbers", "Reexport", "Requires", "SparseArrays", "SpecialFunctions", "TimerOutputs"]
-git-tree-sha1 = "2c8329f16addffd09e6ca84c556e2185a4933c64"
-uuid = "052768ef-5323-5732-b1bb-66c8b64840ba"
-version = "3.5.0"
 
 [[deps.Cairo_jll]]
 deps = ["Artifacts", "Bzip2_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
@@ -1158,11 +1134,6 @@ git-tree-sha1 = "b3bfd02e98aedfa5cf885665493c5598c350cd2f"
 uuid = "2e619515-83b5-522b-bb60-26c02a35a201"
 version = "2.2.10+0"
 
-[[deps.ExprTools]]
-git-tree-sha1 = "b7e3d17636b348f005f11040025ae8c6f645fe92"
-uuid = "e2ba6199-217a-4e67-a87a-7c52f15ade04"
-version = "0.1.6"
-
 [[deps.FFMPEG]]
 deps = ["FFMPEG_jll"]
 git-tree-sha1 = "b57e3acbe22f8484b4b5ff66a7499717fe1a9cc8"
@@ -1228,18 +1199,6 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Libglvnd_jll", "Pkg", "Xorg_libXcu
 git-tree-sha1 = "dba1e8614e98949abfa60480b13653813d8f0157"
 uuid = "0656b61e-2033-5cc2-a64a-77c0f6c09b89"
 version = "3.3.5+0"
-
-[[deps.GPUArrays]]
-deps = ["Adapt", "LinearAlgebra", "Printf", "Random", "Serialization", "Statistics"]
-git-tree-sha1 = "7772508f17f1d482fe0df72cabc5b55bec06bbe0"
-uuid = "0c68f7d7-f131-5f86-a1c3-88cf8149b2d7"
-version = "8.1.2"
-
-[[deps.GPUCompiler]]
-deps = ["ExprTools", "InteractiveUtils", "LLVM", "Libdl", "Logging", "TimerOutputs", "UUIDs"]
-git-tree-sha1 = "2c7c032f2940f45ab44df765a7333026927afa00"
-uuid = "61eb1bfa-7361-4325-ad38-22787b887f55"
-version = "0.13.5"
 
 [[deps.GR]]
 deps = ["Base64", "DelimitedFiles", "GR_jll", "HTTP", "JSON", "Libdl", "LinearAlgebra", "Pkg", "Printf", "Random", "Serialization", "Sockets", "Test", "UUIDs"]
@@ -1377,18 +1336,6 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "f6250b16881adf048549549fba48b1161acdac8c"
 uuid = "c1c5ebd0-6772-5130-a774-d5fcae4a789d"
 version = "3.100.1+0"
-
-[[deps.LLVM]]
-deps = ["CEnum", "LLVMExtra_jll", "Libdl", "Printf", "Unicode"]
-git-tree-sha1 = "46092047ca4edc10720ecab437c42283cd7c44f3"
-uuid = "929cbde3-209d-540e-8aea-75f648917ca0"
-version = "4.6.0"
-
-[[deps.LLVMExtra_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "6a2af408fe809c4f1a54d2b3f188fdd3698549d6"
-uuid = "dad2f222-ce93-54a1-a47d-0025e8a3acab"
-version = "0.0.11+0"
 
 [[deps.LZO_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1688,18 +1635,6 @@ uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 deps = ["Serialization"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
-[[deps.Random123]]
-deps = ["Libdl", "Random", "RandomNumbers"]
-git-tree-sha1 = "0e8b146557ad1c6deb1367655e052276690e71a3"
-uuid = "74087812-796a-5b5d-8853-05524746bad3"
-version = "1.4.2"
-
-[[deps.RandomNumbers]]
-deps = ["Random", "Requires"]
-git-tree-sha1 = "043da614cc7e95c703498a491e2c21f58a2b8111"
-uuid = "e6cf234a-135c-5ec9-84dd-332b85af5143"
-version = "1.5.3"
-
 [[deps.Ratios]]
 deps = ["Requires"]
 git-tree-sha1 = "01d341f502250e81f6fec0afe662aa861392a3aa"
@@ -1859,12 +1794,6 @@ uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
 [[deps.Test]]
 deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-
-[[deps.TimerOutputs]]
-deps = ["ExprTools", "Printf"]
-git-tree-sha1 = "7cb456f358e8f9d102a8b25e8dfedf58fa5689bc"
-uuid = "a759f4b9-e2f1-59dc-863e-4aeb61b1ea8f"
-version = "0.5.13"
 
 [[deps.URIs]]
 git-tree-sha1 = "97bbe755a53fe859669cd907f2d96aee8d2c1355"
@@ -2237,8 +2166,6 @@ version = "0.9.1+5"
 # ╟─93d584fe-3c2c-4849-ac60-45888767948d
 # ╟─75eb6eb7-2b51-43a6-b5bb-4a7068de55b7
 # ╟─255e02eb-2ab7-4c22-ab16-6a262687f383
-# ╠═96fb50fb-9954-49a5-b512-39dc9199f7d5
-# ╠═458bfaab-594f-48f8-945a-2ae675a9aebc
 # ╟─6b08d896-cdb1-4c3a-bec8-3922eaaac279
 # ╠═ddd2a803-07fc-40cc-8db1-e9ffc5748a73
 # ╠═559e468f-1970-458b-a9f9-a7fb08291bd1
@@ -2279,5 +2206,6 @@ version = "0.9.1+5"
 # ╟─08116d16-d041-406c-b41d-8c91b5e68040
 # ╟─2e816f20-9d5e-4782-8a06-fa7e1ca9f7c5
 # ╠═88531bc9-0cd7-4bdd-a6e8-1487772eb008
+# ╠═af6568d6-c54f-408f-a286-0193c8cff998
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

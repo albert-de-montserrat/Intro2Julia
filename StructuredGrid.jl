@@ -180,5 +180,3 @@ function connectivity(gr::Grid{LinearMesh,M,N}, iel::Int) where {M, N}
         idx + nx*ny + nx,
     )
 end
-
-
