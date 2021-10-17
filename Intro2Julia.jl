@@ -175,7 +175,13 @@ zeros(3) # default is Float64, can do zeros(T, n) where T is the type
 rand(3) # default is Float64, can do rand(T, n) where T is the type
 
 # ╔═╡ 79d5b308-5152-4aaa-a9ca-f07043f43b9b
-x = Array{Float64,1}(undef, 3) # Array{Type}(undef, number of elements of i-th dimension) → fastest way to allocate empty array
+Array{Float64,1}(undef, 3) # Array{Type}(undef, number of elements of i-th dimension) → fastest way to allocate empty array
+
+# ╔═╡ 63d8c1bf-7837-48fe-b54e-ad9e47a17e1e
+Vector{Float64}(undef, 3)
+
+# ╔═╡ 45a56cc0-705a-4a12-9a69-a14439cc7276
+x = Matrix{Float64}(undef, 3, 3)
 
 # ╔═╡ 2afd08a4-2317-4157-b3af-052c37a90201
 md"""
@@ -286,8 +292,11 @@ A\v # this calls LAPACK for dense arrays and SuitSparse for sparse arrays
 
 # ╔═╡ 4c4bcecd-881e-4c6d-922a-66a4e181181a
 md"""
-You could ```inv(A)*v```, but please never do ```inv(A)```, if you really need an inverse do ```A\I``` ($$AA^{-1}=I\rightarrow A^{-1}=A^{-1}I$$)
+You could ```inv(A)*v```, but please never ever do ```inv(A)```, if you explicetely need an inverse do ```A\I``` ($$AA^{-1}=I\rightarrow A^{-1}=A^{-1}I$$)
 """
+
+# ╔═╡ cc926297-0436-42d3-b7bc-af493c90a133
+inv(A) == A\I
 
 # ╔═╡ 1165c3cb-c90b-4dfb-b7dc-36f3f47b7b65
 md"""
@@ -654,6 +663,13 @@ md"""
 Julia has its own [multi-threading](https://docs.julialang.org/en/v1/base/multi-threading/) (~OpenMP) package. It's usage is straightforward, however, be careful because does not the parallel loops are **NOT THREAD-SAFE**. Tip for perfomance: try to minimize as hard as possible the number of memory allocations occurring inside threaded loops.
 """
 
+# ╔═╡ 7d66e01c-c33a-4daf-a4d8-94fe8da0d0ad
+with_terminal() do 
+	Threads.@threads for i in 1:10
+		println("i = $i on thread ", Threads.threadid()) 	
+	end
+end
+
 # ╔═╡ f3cdd5e9-20ec-417c-9b3e-34f381352fb0
 function ft1(x::AbstractArray)
     Threads.@threads for i in eachindex(x) # Macro Threads.@threads multithreads the loop
@@ -666,14 +682,14 @@ end;
 function ft2(x::AbstractArray)
     a = zero(eltype(x)) # make a zero of the type of the elements in x
     Threads.@threads for i in eachindex(x)
-        a += sin(x[i]) # there are race conditions here, the function will produce different results
+        a += sin(x[i]) # race condition, the function will produce different results
     end
     a
 end;
 
 # ╔═╡ 23814e8e-185b-4550-97c4-f4aa418571d6
 function ft3(M::Matrix)
-    Threads.@threads for j in size(M,2) # only the outer loop is threaded, bad for performance
+    Threads.@threads for j in size(M,2) # only the outer loop is threaded
         for i in size(M,1)
             M[i,j] += sin(M[i,j]) # thread-safe
         end
@@ -688,6 +704,30 @@ function ft4(M::Matrix)
     end
     M
 end;
+
+# ╔═╡ 9fd82f21-dcee-44ef-b3df-ae9e6161d3e2
+with_terminal() do 
+	@sync for i in 1:10
+		Threads.@spawn println("i = $i on thread ", Threads.threadid()) 	
+	end
+end
+
+# ╔═╡ c269affa-6890-4b7b-98b7-6da9b49aa46b
+with_terminal() do 
+	@sync begin
+		Threads.@spawn println("thread ", Threads.threadid()) 	
+		Threads.@spawn println("thread ", Threads.threadid()) 	
+		Threads.@spawn println("thread ", Threads.threadid()) 	
+		Threads.@spawn println("thread ", Threads.threadid()) 	
+	end
+end
+
+# ╔═╡ 9337c7f3-3819-4448-9ed1-533814e6d912
+md"""
+Rule of thumb: 
+  * @threads → static scheduling → balanced work (low(ish) overhead)
+  * @spawn → dynamic scheduling → unbalanced work (high overhead)
+"""
 
 # ╔═╡ 6605a311-2bfb-4ad8-a678-fdbdb826dd32
 md"""
@@ -2059,6 +2099,8 @@ version = "0.9.1+5"
 # ╠═4a436609-0642-4ae6-91cd-19fcd58a085e
 # ╠═c135540c-553d-4680-a939-f07be566684e
 # ╠═79d5b308-5152-4aaa-a9ca-f07043f43b9b
+# ╠═63d8c1bf-7837-48fe-b54e-ad9e47a17e1e
+# ╠═45a56cc0-705a-4a12-9a69-a14439cc7276
 # ╟─2afd08a4-2317-4157-b3af-052c37a90201
 # ╠═931f7397-aebf-4675-bedc-66eaa753f16d
 # ╟─ff7d609d-e7ed-47e7-a32e-c4ccd6841a8d
@@ -2089,6 +2131,7 @@ version = "0.9.1+5"
 # ╟─c4b5f684-6756-4efd-87a2-782483cd77e5
 # ╠═d04d45e5-87b2-4f76-b0f8-d9a415608f03
 # ╟─4c4bcecd-881e-4c6d-922a-66a4e181181a
+# ╠═cc926297-0436-42d3-b7bc-af493c90a133
 # ╠═c935a6db-ed98-4f01-8e41-b6bd903f7a16
 # ╠═d2a9fa6c-9aa5-4818-8746-4fc4142a34ee
 # ╠═14634323-48d4-4481-ae6f-602913747220
@@ -2153,10 +2196,14 @@ version = "0.9.1+5"
 # ╠═a254406e-7579-4ec1-9c46-bed389cd046a
 # ╠═591cadf3-68e7-4dd4-bd9e-ddae1795fe42
 # ╟─4468400e-3f7c-45e7-bbf0-c7100da2810c
+# ╠═7d66e01c-c33a-4daf-a4d8-94fe8da0d0ad
 # ╠═f3cdd5e9-20ec-417c-9b3e-34f381352fb0
 # ╠═fb12053c-e8be-418c-b62a-17934c74f079
 # ╠═23814e8e-185b-4550-97c4-f4aa418571d6
 # ╠═d4efea27-464e-416c-97cc-58302d5ec829
+# ╠═9fd82f21-dcee-44ef-b3df-ae9e6161d3e2
+# ╠═c269affa-6890-4b7b-98b7-6da9b49aa46b
+# ╟─9337c7f3-3819-4448-9ed1-533814e6d912
 # ╟─6605a311-2bfb-4ad8-a678-fdbdb826dd32
 # ╠═f2d55b58-74a0-408c-b820-962de127c4df
 # ╠═a6aed0b2-882c-44bd-96f3-aff42e0062af
